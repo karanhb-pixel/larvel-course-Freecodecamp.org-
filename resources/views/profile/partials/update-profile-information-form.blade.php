@@ -17,7 +17,7 @@
         @csrf
         @method('patch')
 
-        @if($user->getFirstMedia())
+        @if($user->imageUrl())
             <!-- Current Image -->
             <div class="mb-4">
                 <x-input-label for="current_image" :value="__('Current Avatar')" />

@@ -10,23 +10,48 @@
                     <x-user-avatar :user="$post->user"/>
                     {{-- user details --}}
                     <div>
-                        {{-- {{ dd($post->user->name); }} --}}
+                        
                         <x-follower-button class="flex gap-2" :user="$post->user">
                             <a href="{{ route('profile.show', $post->user) }}" class="text-lg font-semibold hover:underline">{{ $post->user->name }}</a>
-                           @auth
-                            &middot;
-                            <button @click="follow()" x-text="following ? 'Unfollow' : 'Follow'"  :class="following ? 'text-red-600':'text-emerald-500'" ></button>
-                            @endauth
+                           @if($post->user->id !== auth()->id())
+                                @auth
+                                &middot;
+                                <button @click="follow()" x-text="following ? 'Unfollow' : 'Follow'"  :class="following ? 'text-red-600':'text-emerald-500'" ></button>
+                                @endauth
+                            @endif
                         </x-follower-button>
 
                         <div class="flex gap-2 text-gray-500 text-sm">
                             {{ $post->user->readTime() }} min read
                             &middot;
-                            {{ $post->created_at->format('M d, Y') }}
+                            {{ $post->getCreatedAtDisplay() }}
                         </div>
                     </div>
                 </div>
                 {{-- End of user details section --}}
+
+                {{-- Edit and Delete Section --}}
+                @if($post->user->id === auth()->id())
+                <div class="border-t border-gray-200 flex gap-4 mt-4 pt-4" >
+                    
+                    {{-- Edit Post --}}
+                    <x-primary-button 
+                    href="{{ route('post.edit', $post->slug) }}">
+                        Edit Post
+                    </x-primary-button>
+                    
+                    {{-- Delete Post --}}
+                    <form class="inline-block" action={{ route('post.destroy', $post) }} method="POST" >
+                        @csrf
+                        @method('DELETE')
+
+                    </form>
+                    <x-danger-button class="hover:underline">
+                        Delete Post
+                    </x-danger-button>
+                </div>
+                @endif
+                {{-- End of Edit and Delete section --}}
 
                 {{-- Clap Section --}}
                 <div class="border-t border-b py-4 flex items-center justify-between mt-8 px-4">

@@ -12,10 +12,12 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
+
 class User extends Authenticatable implements MustVerifyEmail,HasMedia
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable,InteractsWithMedia;
+     
 
     /**
      * The attributes that are mass assignable.
@@ -54,6 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail,HasMedia
         ];
     }
 
+
     
     public function registerMediaConversions(?Media $media = null): void
     {
@@ -90,11 +93,14 @@ class User extends Authenticatable implements MustVerifyEmail,HasMedia
 
     public function imageUrl()
     {
-        if ($this->getFirstMedia('avatar') === null) {
-            return 'https://placehold.co/128x128/png';
+        $media = $this->getFirstMedia('avatar');
+        if($media){
+            if($media?->hasGeneratedConversion('avatar')){
+                return $media->getUrl('avatar');
+            }
+            return $media->getUrl();
         }
-        return $this->getFirstMedia('avatar')->getUrl('avatar');
-
+        return 'https://placehold.co/128x128/png';
     }
 
     

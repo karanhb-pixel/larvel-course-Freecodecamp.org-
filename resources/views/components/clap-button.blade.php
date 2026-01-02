@@ -1,7 +1,7 @@
 @props(['post'])
-
+@auth
 <button x-data="{
-        count: {{ $post->claps()->count() }},
+        count: {{ $post->claps_count ? $post->claps_count : 0 }},
         hasClapped : {{ auth()->check() && auth()->user()->hasClapped($post) ? 'true' : 'false' }},
         claps(){
             axios.post('/clap/{{ $post->id }}')
@@ -14,7 +14,7 @@
         }
     }" 
     class="text-gray-500 hover:text-gray-900 flex items-center gap-2" 
-    @click="claps()">
+    @click="claps()" :disabled = "{{ $post->user->id == auth()->id() ? 'true' : 'false' }}">
     
     <svg xmlns="http://www.w3.org/2000/svg" :fill="hasClapped ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke-width="1.5" :stroke="hasClapped ? 'none' : 'currentColor'"
         class="size-6 w-8">
@@ -25,3 +25,4 @@
 
     </span>
 </button>
+@endauth

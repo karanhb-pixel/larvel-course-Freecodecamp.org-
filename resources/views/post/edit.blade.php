@@ -2,18 +2,28 @@
 
     <div class="py-4">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold mb-4">Create New Post</h1>
+            <h1 class="text-3xl font-bold mb-4">
+                Update Post : <strong>{{ $post->title }}</strong>
+            </h1>
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg lg:p-8">
-                <form action="{{ route('post.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('post.update', $post->id) }}" method="POST" enctype="multipart/form-data">
 
                     @csrf
+                    @method('put')
+
+                    @if($post->imageUrl())
+                        <!-- Current Image -->
+                        <div class="mb-4">
+                            <img src="{{ $post->imageUrl() }}" alt="{{ $post->title }}" class="w-full object-cover">
+
+                        </div>
+                    @endif
 
                     <!-- Image -->
                     <div>
                         <x-input-label for="image" :value="__('Image')" />
-                        <x-text-input id="image" name="image"
-                            class="block mt-1 w-full"
-                            aria-describedby="file_input_help"  type="file" :value="old('image')"/>
+                        <x-text-input id="image" name="image" class="block mt-1 w-full"
+                            aria-describedby="file_input_help" type="file" :value="old('image')" />
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG or
                             GIF (MAX. 800x400px).</p>
 
@@ -23,11 +33,12 @@
                     <!-- Category -->
                     <div class="mt-4">
                         <x-input-label for="category_id" :value="__('Category')" />
-                        <select name="category_id" id="category_id" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 mt-1">
+                        <select name="category_id" id="category_id"
+                            class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 mt-1">
 
                             <option value="">Select a Category</option>
                             @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>
+                                <option value="{{ $category->id }}" @selected(old('category_id', $post->category_id) == $category->id)>
                                     {{ $category->name }}
                                 </option>
                             @endforeach
@@ -39,7 +50,7 @@
                     <div class="mt-4">
                         <x-input-label for="title" :value="__('Title')" />
                         <x-text-input id="title" class="block mt-1 w-full" type="text" name="title"
-                            :value="old('title')" required autofocus />
+                            :value="old('title', $post->title)" required autofocus />
                         <x-input-error :messages="$errors->get('title')" class="mt-2" />
                     </div>
 
@@ -47,7 +58,7 @@
                     <div class="mt-4">
                         <x-input-label for="content" :value="__('Content')" />
                         <x-textarea-input id="content" class="block mt-1 w-full" type="textarea" name="content">
-                            {{ old('content') }}
+                            {{ old('content', $post->content) }}
                         </x-textarea-input>
                         <x-input-error :messages="$errors->get('content')" class="mt-2" />
                     </div>
@@ -55,16 +66,15 @@
                     <!-- Published At -->
                     <div class="mt-4">
                         <x-input-label for="published_at" :value="__('Published At')" />
-                        <x-text-input id="published_at" class="block mt-1 w-full" type="datetime-local" name="published_at"
-                            :value="old('published_at')" required autofocus />
+                        <x-text-input id="published_at" class="block mt-1 w-full" type="datetime-local"
+                            name="published_at" :value="old('published_at',$post->published_at)" required autofocus />
                         <x-input-error :messages="$errors->get('published_at')" class="mt-2" />
                     </div>
-
 
                     {{-- submit button --}}
                     <div class="flex items-center justify-end mt-4">
                         <x-primary-button class="ml-4">
-                           Submit
+                            Submit
                         </x-primary-button>
                 </form>
 

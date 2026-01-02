@@ -9,11 +9,14 @@ use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 class Post extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
+    use HasSlug;
 
     protected $fillable = [
         // 'image',
@@ -25,6 +28,21 @@ class Post extends Model implements HasMedia
         'published_at',
     ];
 
+    protected $casts = [
+        'published_at' => 'datetime', 
+    ];
+
+    
+    /**
+     * Get the options for generating the slug.
+     */
+    public function getSlugOptions() : SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('title')
+            ->saveSlugsTo('slug');
+    }
+
     public function registerMediaConversions(?Media $media = null): void
     {
         $this
@@ -35,6 +53,12 @@ class Post extends Model implements HasMedia
             ->addMediaConversion('large')
             ->width(1200)
             ->nonQueued();
+    }
+        public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('default')
+            ->singleFile();
     }
 
     public function user()
@@ -54,9 +78,23 @@ class Post extends Model implements HasMedia
 
     public function imageUrl($conversionName = '')
     { 
-        if($this->getFirstMedia() === null){
-            return 'https://placehold.co/400x400/png';
+        $media = $this->getFirstMedia();
+        if($media){
+
+            if($media?->hasGeneratedConversion($conversionName)){
+                return $media->getUrl($conversionName);
+            }
+            return $media?->getUrl();
         }
-        return $this->getFirstMedia()->getUrl($conversionName);
+        return 'https://placehold.co/128x128/png';
+
+    }
+
+    public function getCreatedAtDisplay(){
+        
+        if($this->published_at){
+            return $this->published_at->format('d M, Y');
+        }
+        return $this->created_at->format('d M, Y');
     }
 }
